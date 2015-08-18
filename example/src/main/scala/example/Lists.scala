@@ -2,6 +2,7 @@ package example
 
 import common._
 
+
 object Lists {
   /**
    * This method computes the sum of all elements in the list xs. There are
@@ -27,10 +28,10 @@ object Lists {
     if (xs.isEmpty)
       throw new java.util.NoSuchElementException("empty list")
     else
-      if (!xs.tail.isEmpty)
-        xs.head + sum(xs.tail)
-      else
-        xs.head
+    if (!xs.tail.isEmpty)
+      xs.head + sum(xs.tail)
+    else
+      xs.head
 
   /**
    * This method returns the largest element in a list of integers. If the
@@ -48,11 +49,11 @@ object Lists {
   def max(xs: List[Int]): Int =
     if (xs.isEmpty) throw new java.util.NoSuchElementException("empty list")
     else
-      if (xs.size > 1)
-        if ((xs.head) < (xs.last))
-          max(xs.tail)
-        else
-          max(xs.dropRight(1))
+    if (xs.size > 1)
+      if ((xs.head) < (xs.last))
+        max(xs.tail)
       else
-        xs.head
+        max(xs.dropRight(1))
+    else
+      xs.head
 }

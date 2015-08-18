@@ -50,7 +50,7 @@ val currentCourseId = "progfun-005"
 Map(
   "example" ->  ProjectDetails(
                   packageName = "example",
-                  assignmentPartId = "gTzFogNl",
+                  assignmentPartId = "gTzFogNk",
                   maxScore = 10d,
                   styleScoreRatio = 0.2,
                   courseId=currentCourseId),
@@ -125,6 +125,18 @@ Map(
                   assignmentPartId = "nuvh59Zi",
                   maxScore = 20d,
                   styleScoreRatio = 0.0,
+                  courseId=currentCourseId),
+  "constraints"  -> ProjectDetails(
+                  packageName = "constraints",
+                  assignmentPartId = "kL1K2FAj",
+                  maxScore = 10d,
+                  styleScoreRatio = 0.0,
+                  courseId=currentCourseId),
+  "interpreter"  -> ProjectDetails(
+                  packageName = "interpreter",
+                  assignmentPartId = "1SZhe1Ua283r87a7rd",
+                  maxScore = 10d,
+                  styleScoreRatio = 0.0,
                   courseId=currentCourseId)
 )}
 
@@ -144,7 +156,6 @@ handoutFiles <<= (baseDirectory, projectDetailsMap, commonSourcePackages) map { 
     (basedir / "project" ** ("*.scala" || "*.sbt")) +++
     (basedir / "project" / "scalastyle_config.xml") +++
     (basedir / "project" / "scalastyle_config_reactive.xml") +++
-    (basedir / "lib_managed" ** "*.jar") +++
     (basedir * (".classpath" || ".project")) +++
     (basedir / ".settings" / "org.scala-ide.sdt.core.prefs")
   }

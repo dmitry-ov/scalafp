@@ -16,11 +16,11 @@ object SubmitJsonProtocol extends DefaultJsonProtocol {
   implicit val jsonSubmissionFormat = jsonFormat6(JsonSubmission)
 //  implicit val jsonQueueResultFormat = jsonFormat1(JsonQueueResult)
 }
-    
-// forwarder to circumvent deprecation
-object DeprectaionForwarder { 
 
-  @deprecated("", "") class FwdClass { def insecureClientForwarder(credentials: dispatch.Http.CurrentCredentials) = insecureClient(credentials) }; object FwdClass extends FwdClass 
+// forwarder to circumvent deprecation
+object DeprectaionForwarder {
+
+  @deprecated("", "") class FwdClass { def insecureClientForwarder(credentials: dispatch.Http.CurrentCredentials) = insecureClient(credentials) }; object FwdClass extends FwdClass
   import org.apache.http.impl.client.DefaultHttpClient
   import org.apache.http.conn.ssl._
   import org.apache.http.conn.scheme._
@@ -31,16 +31,16 @@ object DeprectaionForwarder {
 
   class NaiveTrustManager extends X509TrustManager {
 
-    override def checkClientTrusted(arg0: Array[X509Certificate], arg1: String) {        
+    override def checkClientTrusted(arg0: Array[X509Certificate], arg1: String) {
     }
-    override def checkServerTrusted(arg0: Array[X509Certificate], arg1: String) {      
+    override def checkServerTrusted(arg0: Array[X509Certificate], arg1: String) {
     }
-    override def getAcceptedIssuers(): Array[X509Certificate] = {      
+    override def getAcceptedIssuers(): Array[X509Certificate] = {
       return null;
     }
   }
 
-  @deprecated("", "") def insecureClient(credentials: dispatch.Http.CurrentCredentials) = {    
+  @deprecated("", "") def insecureClient(credentials: dispatch.Http.CurrentCredentials) = {
     val sslContext = SSLContext.getInstance("TLS");
     sslContext.init(null, Array(new NaiveTrustManager()), new SecureRandom());
     val sf = new SSLSocketFactory(sslContext, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
@@ -53,18 +53,18 @@ object DeprectaionForwarder {
     val params = dispatch_client.createHttpParams
     val cm = new SingleClientConnManager(params, schemeRegistry);
 
-    val client = new DefaultHttpClient(cm, params)      
+    val client = new DefaultHttpClient(cm, params)
     client
   }
-  
+
 }
 
 object CourseraHttp {
   private lazy val http = new Http with NoLogging
-  private lazy val insecureHttp = new Http with NoLogging { 
+  private lazy val insecureHttp = new Http with NoLogging {
       override def make_client = DeprectaionForwarder.FwdClass.insecureClientForwarder(credentials)
   }
-   
+
 
   private def executeRequest[T](req: Request)(parse: String => ValidationNEL[String, T]): ValidationNEL[String, T] = {
     try {
@@ -72,7 +72,7 @@ object CourseraHttp {
         case ex: javax.net.ssl.SSLPeerUnverifiedException =>
           insecureHttp(req >- { res => parse(res) }) // try the insecure version
       }
-    } catch {      
+    } catch {
       case ex: IOException =>
         ("Connection failed\n"+ ex.toString()).failNel
       case StatusCode(code, message) =>
@@ -96,7 +96,8 @@ object CourseraHttp {
       // |email_address|a@b.com|challenge_key|XXYYXXYYXXYY|state|XXYYXXYYXXYY|challenge_aux_data|
       val parts = res.split('|').filterNot(_.isEmpty)
       if (parts.length < 7)
-        ("Unexpected challenge format: \n"+ res).failNel
+        ("Unexpected challenge format: \n"+ res + "\nNOTE: Make sure you have a freshly" +
+        " downloaded version of the assignment from the correct course.").failNel
       else
         Challenge(parts(1), parts(3), parts(5)).successNel
     }

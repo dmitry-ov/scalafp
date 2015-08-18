@@ -49,7 +49,6 @@ object ProgFunBuild extends Build {
     submitSetting,
     createHandoutSetting,
     // put all libs in the lib_managed directory, that way we can distribute eclipse project files
-    retrieveManaged := true,
     EclipseKeys.relativizeLibs := true,
     // Avoid generating eclipse source entries for the java directories
     (unmanagedSourceDirectories in Compile) <<= (scalaSource in Compile)(Seq(_)),
@@ -63,6 +62,12 @@ object ProgFunBuild extends Build {
     setTestPropertiesSetting,
     setTestPropertiesHook
   ) settings (packageSubmissionFiles: _*)
+
+  /***********************************************************
+   * PROJECT DEFINITION FOR RECITATIONS
+   */
+
+  lazy val recitations = Project(id = "recitations", base = file("recitations"))
 
 
   /***********************************************************
@@ -165,9 +170,21 @@ object ProgFunBuild extends Build {
     res match {
       case Failure(msgs) =>
         for (msg <- msgs.list) logger.error(msg)
+        logger.warn("""NOTE:
+          |   - Make sure that you have the freshly downloaded assignment from the
+          |     correct course.
+          |   - Make sure that your email is correct and that you have copied the
+          |     password correctly from the assignments page.""".stripMargin)
         failSubmit()
       case Success(response) =>
-        logger.success("Your code was successfully submitted: "+ response)
+        logger.success("""
+          | Your code was successfully submitted: %s
+          | NOTE:
+          |   - The final grade is calculated based on the score you get for this assignment
+          |     and the number of days that this submission is after the soft deadline. If your
+          |     final score does not match please make sure to check the exact deadlines.
+          |   - For each assignment there is a limit on the maximum number of attempts you can make.
+          """.format(response).stripMargin)
     }
   }
 
@@ -346,6 +363,7 @@ object ProgFunBuild extends Build {
     scalaVersion <<= (scalaVersion in assignmentProject),
     scalacOptions <<= (scalacOptions in assignmentProject),
     libraryDependencies <<= (libraryDependencies in assignmentProject),
+    unmanagedBase <<= (unmanagedBase in assignmentProject),
 
     /** settings specific to the grading project */
     initGradingSetting,
@@ -636,7 +654,12 @@ object ProgFunBuild extends Build {
     logOpt.foreach(_.info(GradingFeedback.feedbackString(uuid, html = false)))
     val Value(projectDetails) = projectDetailsR
     apiKeyR match {
-      case Value(apiKey) if (!apiKey.isEmpty) =>
+      case Value(originalApiKey) if (!originalApiKey.isEmpty) =>
+        val apiKey = projectDetails.courseId match { // OMG what a hack!!!
+          case "progfun-005" => "jqw9WQi3MgvmOJsK"
+          case "reactive-001" => "Pwnc6dEcYBBAuCSP2mof-react"
+          case "progfun2-002" => "iqw9WQi3MgvmOJsK"
+        }
         logOpt.foreach(_.debug("Course Id for submission: " + projectDetails.courseId))
         logOpt.foreach(_.debug("Corresponding API key: " + apiKey))
         // if build failed early, we did not even get the api key from the submission queue
